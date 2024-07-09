@@ -67,6 +67,7 @@ def f(x,a,b):
     masses.
     '''
     return 1/numpy.sqrt(a+b/x)
+
 def TSMptpt(m_1,m_2,r_200_1,r_200_2,d_end,E):
     '''
     This function calculates the time it takes for the system to go from a
@@ -94,9 +95,8 @@ def TSMptpt(m_1,m_2,r_200_1,r_200_2,d_end,E):
         print('TSMptpt: error total energy should not be > 0, exiting')
         sys.exit()
     if t < 0:
-        print('TSM < 0 encountered')    
+        print('TSM < 0 encountered')
     return t
-      
 
 def PEnfwnfw(d,m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=100):
     '''
@@ -159,7 +159,7 @@ def NFWprop(M_200,z,c):
     rho_s = del_c*rho_cr   
     return del_c, r_s, r_200, c, rho_s
 
-def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mesh=200):
+def MCengine_pre_merger(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mesh=200):
     '''
     This is the Monte Carlo engine that draws random parameters from the
     measured distributions and then calculates the kenematic parameters of the
@@ -203,7 +203,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     parameters.  The Nth element of each array corresponds to the system
     properties of the Nth viable solution.
     m_1_out = [units: M_sun] M_200 of halo 1
-    m_2_out = [units: M_sun] M_200 of halo 2
+    m_2_out = [units: M_sun] M_200 of halo 1
     z_1_out = redshift of halo 1
     z_2_out = redshift of halo 2
     alpha_out = [units: degrees] merger axis angle with respect to the plane of
@@ -295,9 +295,21 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     v_3d_col_out = numpy.zeros(N_mc)
     d_max_out = numpy.zeros(N_mc)
     TSM_0_out = numpy.zeros(N_mc)
-    TSM_1_out = numpy.zeros(N_mc)
     T_out = numpy.zeros(N_mc)
     prob_out = numpy.zeros(N_mc)
+    bound = numpy.zeros(N_mc) > 1
+    
+    # Estimate rough average redshift and Hubble parameter
+    # these will be used to determine valid unbound states
+    if numpy.logical_and(numpy.size(Z1)==2,numpy.size(Z2)==2):
+        z_1_mean = Z1[0]
+        z_2_mean = Z2[0]
+    elif numpy.logical_and(numpy.size(Z1)>2,numpy.size(Z2)>2):
+        z_1_mean = numpy.mean(Z1)
+        z_2_mean = numpy.mean(Z2)
+    z_mean = (z_1_mean + z_2_mean)/2.
+    # Hubble parameter at mean cluster redshift
+    H = cosmo.H(z_mean)
     
     N_d = numpy.size(D_proj)
     t_start = time.time()
@@ -373,10 +385,6 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         # Calculate the 3D velocity at observed time
         v_3d_obs = v_rad_obs/numpy.sin(alpha)
         
-        if v_3d_obs > v_3d_max:
-            # then the randomly chosen alpha is not valid
-            continue
-        
         # Calculate the 3D separation
         d_3d = d_proj/numpy.cos(alpha)
         
@@ -387,8 +395,50 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         v_3d_col = numpy.sqrt(v_3d_obs**2+2/mu*(PE_obs-PE_col))
         
         if v_3d_col > v_3d_max:
-            # then the randomly chosen alpha is not valid
-            continue
+            # then the randomly chosen alpha results in a possible unbound
+            # scenario, need to verify that it is actually possible given the
+            # two body assumption, i.e. that the radial relative velocity of the
+            # subclusters is less than the radial Hubble flow velocity
+            d_rad = d_3d * numpy.sin(alpha)
+            v_rad_hubble = H * d_rad
+            
+            if v_rad_obs <= v_rad_hubble:
+                # then this is a reasonable unbound solution
+                # the rest of the calculations in the loop are not meaningful
+                # though, so just record the valuable parameters
+                m_1_out[i] = m_1
+                m_2_out[i] = m_2
+                z_1_out[i] = z_1
+                z_2_out[i] = z_2
+                d_proj_out[i] = d_proj
+                v_rad_obs_out[i] = v_rad_obs
+                alpha_out[i] = alpha*180/numpy.pi
+                v_3d_obs_out[i] = v_3d_obs
+                d_3d_out[i] = d_3d
+                v_3d_col_out[i] = v_3d_col
+                bound[i] = False
+                
+                i+=1
+                
+                # Estimate calculation time
+                if i== 10 or i == 100 or i%1000 == 0:
+                    del_t = time.time()-t_start
+                    t_total = N_mc*del_t/i
+                    eta = (t_total-del_t)/60
+                    print('Completed Monte Carlo iteration {0} of {1}.'.format(i,N_mc))
+                    print('~{0:0.0f} minutes remaining'.format(eta))
+                
+                continue
+            
+            else:
+                # this unbound realization is not allowed, skip to next
+                # realization
+                continue
+
+        else:
+            # then the randomly chosen alpha results in a bound scenario
+            # the rest of the calcualtions are meaningful
+            bound[i] = True
         
         # Total Energy
         E = PE_obs+mu/2*v_3d_obs**2
@@ -400,7 +450,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         for j in numpy.arange(TSM_mesh):
             PE_array[j] = PEnfwnfw(d[j],m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=del_mesh)        
 
-        # Calculate d_max        
+        # Calculate d_max
         if E >= -G*m_1*m_2/(r_200_1+r_200_2):
             # then d_max > r_200_1+r_200_2
             d_max = -G*m_1*m_2/E
@@ -427,12 +477,6 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             mask = d <= d_3d
             TSM_0 = numpy.sum(del_TSM_mesh/numpy.sqrt(2/mu*(E-PE_array[mask]))*kminMpc/sinGyr)
         
-        # Check that TSM_0 < Age of Universe at (z_1+z_2)/2
-        age = cosmo.age((z_1+z_2)/2)
-        if TSM_0 > age:
-            # unlikely that this system could occur
-            continue
-        
         # Calculate period
         if E >= -G*m_1*m_2/(r_200_1+r_200_2):
             # then d_max > r_200_1+r_200_2
@@ -451,9 +495,6 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         # Calculate probability of d_3d
         prob = TSM_0/(T/2)
         
-        # Calculate TSM_1
-        TSM_1 = T-TSM_0        
-
         if TSM_0 < 0:
             print('TSM < 0 encountered')
         
@@ -470,9 +511,8 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         v_3d_col_out[i] = v_3d_col
         d_max_out[i] = d_max
         TSM_0_out[i] = TSM_0
-        TSM_1_out[i] = TSM_1
         T_out[i] = T
-        prob_out[i] = prob        
+        prob_out[i] = prob 
         
         i+=1
         
@@ -484,67 +524,137 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             print('Completed Monte Carlo iteration {0} of {1}.'.format(i,N_mc))
             print('~{0:0.0f} minutes remaining'.format(eta))
 
-    # Pickle the results of the MC analysis
-    filename = prefix+'_m_1.pickle'
+    # print the ratio of bound to total samples
+    print("Probability of system being bound = {0:0.5f}".format(numpy.sum(bound)/N_mc))
+    
+    # parse the output arrays into bound and unbound categories
+
+    # Pickle the results of the MC analysis for the bound samples
+    filename = prefix+'_bound_m_1.pickle'
     F = open(filename,'wb')
-    pickle.dump(m_1_out,F)
+    pickle.dump(m_1_out[bound],F)
     F.close()
-    filename = prefix+'_m_2.pickle'
+    filename = prefix+'_bound_m_2.pickle'
     F = open(filename,'wb')
-    pickle.dump(m_2_out,F)
+    pickle.dump(m_2_out[bound],F)
     F.close()
-    filename = prefix+'_z_1.pickle'
+    filename = prefix+'_bound_z_1.pickle'
     F = open(filename,'wb')
-    pickle.dump(z_1_out,F)
+    pickle.dump(z_1_out[bound],F)
     F.close()    
-    filename = prefix+'_z_2.pickle'
+    filename = prefix+'_bound_z_2.pickle'
     F = open(filename,'wb')
-    pickle.dump(z_2_out,F)
+    pickle.dump(z_2_out[bound],F)
     F.close()
-    filename = prefix+'_d_proj.pickle'
+    filename = prefix+'_bound_d_proj.pickle'
     F = open(filename,'wb')
-    pickle.dump(d_proj_out,F)
+    pickle.dump(d_proj_out[bound],F)
     F.close()
-    filename = prefix+'_v_rad_obs.pickle'
+    filename = prefix+'_bound_v_rad_obs.pickle'
     F = open(filename,'wb')
-    pickle.dump(v_rad_obs_out,F)
+    pickle.dump(v_rad_obs_out[bound],F)
     F.close()
-    filename = prefix+'_alpha.pickle'
+    filename = prefix+'_bound_alpha.pickle'
     F = open(filename,'wb')
-    pickle.dump(alpha_out,F)
+    pickle.dump(alpha_out[bound],F)
     F.close()
-    filename = prefix+'_v_3d_obs.pickle'
+    filename = prefix+'_bound_v_3d_obs.pickle'
     F = open(filename,'wb')
-    pickle.dump(v_3d_obs_out,F)
+    pickle.dump(v_3d_obs_out[bound],F)
     F.close()  
-    filename = prefix+'_d_3d.pickle'
+    filename = prefix+'_bound_d_3d.pickle'
     F = open(filename,'wb')
-    pickle.dump(d_3d_out,F)
+    pickle.dump(d_3d_out[bound],F)
     F.close()    
-    filename = prefix+'_v_3d_col.pickle'
+    filename = prefix+'_bound_v_3d_col.pickle'
     F = open(filename,'wb')
-    pickle.dump(v_3d_col_out,F)
+    pickle.dump(v_3d_col_out[bound],F)
     F.close()    
-    filename = prefix+'_d_max.pickle'
+    filename = prefix+'_bound_d_max.pickle'
     F = open(filename,'wb')
-    pickle.dump(d_max_out,F)
+    pickle.dump(d_max_out[bound],F)
     F.close() 
-    filename = prefix+'_TSM_0.pickle'
+    filename = prefix+'_bound_TSM_0.pickle'
     F = open(filename,'wb')
-    pickle.dump(TSM_0_out,F)
+    pickle.dump(TSM_0_out[bound],F)
     F.close()  
-    filename = prefix+'_TSM_1.pickle'
+    filename = prefix+'_bound_T.pickle'
     F = open(filename,'wb')
-    pickle.dump(TSM_1_out,F)
-    F.close()    
-    filename = prefix+'_T.pickle'
-    F = open(filename,'wb')
-    pickle.dump(T_out,F)
+    pickle.dump(T_out[bound],F)
     F.close()  
-    filename = prefix+'_prob.pickle'
+    filename = prefix+'_bound_prob.pickle'
     F = open(filename,'wb')
-    pickle.dump(prob_out,F)
+    pickle.dump(prob_out[bound],F)
     F.close()    
     
+    # Pickle the results of the MC analysis for the unbound case
+    filename = prefix+'_unbound_m_1.pickle'
+    F = open(filename,'wb')
+    pickle.dump(m_1_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_m_2.pickle'
+    F = open(filename,'wb')
+    pickle.dump(m_2_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_z_1.pickle'
+    F = open(filename,'wb')
+    pickle.dump(z_1_out[~bound],F)
+    F.close()    
+    filename = prefix+'_unbound_z_2.pickle'
+    F = open(filename,'wb')
+    pickle.dump(z_2_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_d_proj.pickle'
+    F = open(filename,'wb')
+    pickle.dump(d_proj_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_v_rad_obs.pickle'
+    F = open(filename,'wb')
+    pickle.dump(v_rad_obs_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_alpha.pickle'
+    F = open(filename,'wb')
+    pickle.dump(alpha_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_v_3d_obs.pickle'
+    F = open(filename,'wb')
+    pickle.dump(v_3d_obs_out[~bound],F)
+    F.close()  
+    filename = prefix+'_unbound_d_3d.pickle'
+    F = open(filename,'wb')
+    pickle.dump(d_3d_out[~bound],F)
+    F.close()    
+    filename = prefix+'_unbound_v_3d_col.pickle'
+    F = open(filename,'wb')
+    pickle.dump(v_3d_col_out[~bound],F)
+    F.close()    
     
-    return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,TSM_1_out,T_out,prob_out
+    return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,T_out,prob_out,bound
+        
+
+"""
+Copyright (c) 2012, William A. Dawson
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimer in the
+  documentation and/or other materials provided with the distribution.
+* Neither the name of the University of California, Davis nor the
+  names of its contributors may be used to endorse or promote products
+  derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL WILLIAM A. DAWSON BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
