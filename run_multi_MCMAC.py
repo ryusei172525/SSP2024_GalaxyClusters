@@ -22,21 +22,6 @@ files = [
 ]
 
 def process_cont(cont, df, filename):
-    # if ("1to3_b0" or "1to3_b0.5") in filename and df['age'][cont] > 2:
-    #     df.loc[cont, 'M1p':'prob.out.upper'] = 0
-    #     return None
-    # elif "1to3_b1" in filename and df['age'][cont] > 2.5:
-    #     df.loc[cont, 'M1p':'prob.out.upper'] = 0
-    #     return None
-    # elif "1to10_b0" in filename and df['age'][cont] > 2:
-    #     df.loc[cont, 'M1p':'prob.out.upper'] = 0
-    #     return None
-    # elif "1to10_b0.5" in filename and df['age'][cont] > 2.4:
-    #     df.loc[cont, 'M1p':'prob.out.upper'] = 0
-    #     return None
-    # elif "1to10_b1" in filename and df['age'][cont] > 3:
-    #     df.loc[cont, 'M1p':'prob.out.upper'] = 0
-    #     return None
     
     Z1 = (df['z1'][cont], df['z1.e'][cont])
     Z2 = (df['z2'][cont], df['z2.e'][cont])
