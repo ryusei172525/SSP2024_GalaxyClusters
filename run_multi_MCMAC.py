@@ -12,7 +12,7 @@ N_mc = 1000
 
 # 作業ディレクトリ
 dir_cat = '../catalogues/'
-dir_output = '../output0710/'
+dir_output = '../output0711/'
 
 # 入力カタログ
 files = [
@@ -93,56 +93,64 @@ def process_file(file):
         collision_time = 2 - 0.68
         df = df[df['age'] <= 2.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to1_b0.5" in filename:
         collision_time = 2 - 0.66
         df = df[df['age'] <= 2.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to1_b1" in filename:
         collision_time = 2 - 0.6
         df = df[df['age'] <= 2.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to3_b0" in filename:
         collision_time = 2 - 0.8
         df = df[df['age'] <= 2.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to3_b0.5" in filename:
         collision_time = 2 - 0.76
         df = df[df['age'] <= 2.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to3_b1" in filename:
         collision_time = 2.5 - 1.18
         df = df[df['age'] <= 2.5]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to10_b0" in filename:  
         collision_time = 2 - 0.96
         df = df[df['age'] <= 2.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to10_b0.5" in filename:
         collision_time = 2.4 - 1.26
         df = df[df['age'] <= 2.4]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
     elif "1to10_b1" in filename:
         collision_time = 3 - 1.76
         df = df[df['age'] <= 3.0]
         df['merger'] = df['age'].apply(lambda x: 'pre' if x < collision_time else 'post')
-        df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
-        df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
+        df['TSC_Catalog'] = df.apply(lambda row: -(collision_time - row['age']) if row['merger'] == 'pre' else row['age'] - collision_time, axis=1)
+        # df['TTC_Catalog'] = df.apply(lambda row: collision_time - row['age'] if row['merger'] == 'pre' else None, axis=1)
+        # df['TSC_Catalog'] = df.apply(lambda row: row['age'] - collision_time if row['merger'] == 'post' else None, axis=1)
 
     with Pool(processes=30) as pool:  # コア数を指定
         results = pool.starmap(process_cont, [(cont, df, filename) for cont in range(len(df))])
