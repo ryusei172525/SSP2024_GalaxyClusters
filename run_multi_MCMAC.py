@@ -52,7 +52,8 @@ def update_dataframe(result, df):
         return
     cont, t = result
 
-    quantiles = [0.5, 0.16, 0.84]
+    quantiles = [0.5, 0.16, 0.84]  # Define the quantiles to calculate: 50th (median), 16th, and 84th percentiles
+
     columns = ['M1p', 'M1p.lower', 'M1p.upper', 'M2p', 'M2p.lower', 'M2p.upper',
                'z1p', 'z1p.lower', 'z1p.upper', 'z2p', 'z2p.lower', 'z2p.upper',
                'd.proj.out', 'd.proj.out.lower', 'd.proj.out.upper',
@@ -64,10 +65,13 @@ def update_dataframe(result, df):
                'd.max.out', 'd.max.out.lower', 'd.max.out.upper',
                'TSC0', 'TSC0.lower', 'TSC0.upper', 'TSC1', 'TSC1.lower', 'TSC1.upper',
                'T.out', 'T.out.lower', 'T.out.upper', 'prob.out', 'prob.out.lower', 'prob.out.upper']
-    
+
+    # Iterate over the column names and their corresponding quantile indices
     for i, col in enumerate(columns):
-        var = t[i // 3]
+        var = t[i // 3]  # Select the variable corresponding to the current column
+        # Check if the variable is not None and is a numeric type
         if var is not None and np.issubdtype(var.dtype, np.number):
+            # Calculate the quantile value and assign it to the corresponding cell in the dataframe
             df.loc[cont, col] = np.quantile(var, quantiles[i % 3])
 
 def process_file(file):
