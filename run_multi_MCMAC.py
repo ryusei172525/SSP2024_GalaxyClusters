@@ -1,6 +1,6 @@
 from multiprocessing import Pool
-from MCMAC_pre_merger import MCengine_pre_merger
-from MCMAC_post_merger import MCengine_post_merger 
+from MCMAC_pre_merger_changeprior import MCengine_pre_merger
+from MCMAC_post_merger_changeprior import MCengine_post_merger 
 import numpy as np
 import pandas as pd
 
@@ -12,7 +12,7 @@ N_mc = 1000
 
 # 作業ディレクトリ
 dir_cat = '../catalogues/'
-dir_output = '../output0711/'
+dir_output = '../output_20degree/'
 
 # 入力カタログ
 files = [
