@@ -15,9 +15,12 @@ dir_cat = '../catalogues/'
 dir_output = '../output_20degree/'
 
 # 入力カタログ
+# files = [
+#     'zh_1to1_b0_z', 'zh_1to1_b0.5_z', 'zh_1to1_b1_z',
+#     'zh_1to3_b0_z', 'zh_1to3_b0.5_z', 'zh_1to3_b1_z',
+#     'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
+# ]
 files = [
-    'zh_1to1_b0_z', 'zh_1to1_b0.5_z', 'zh_1to1_b1_z',
-    'zh_1to3_b0_z', 'zh_1to3_b0.5_z', 'zh_1to3_b1_z',
     'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
 ]
 
