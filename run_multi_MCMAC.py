@@ -1,6 +1,16 @@
 from multiprocessing import Pool
-from MCMAC_pre_merger_changeprior import MCengine_pre_merger
-from MCMAC_post_merger_changeprior import MCengine_post_merger 
+
+# default prior: angle 0-90 degree
+from MCMAC_pre_merger import MCengine_pre_merger
+from MCMAC_post_merger import MCengine_post_merger 
+
+# change prior: angle 0-20 degree
+# from MCMAC_pre_merger_changeprior import MCengine_pre_merger
+# from MCMAC_post_merger_changeprior import MCengine_post_merger 
+
+# weak lensing mass bias
+weak_lensing_bias = True
+
 import numpy as np
 import pandas as pd
 
@@ -12,7 +22,7 @@ N_mc = 1000
 
 # 作業ディレクトリ
 dir_cat = '../catalogues/'
-dir_output = '../output_20degree/'
+dir_output = '../output_weaklensing_bias/'
 
 # 入力カタログ
 # files = [
@@ -21,15 +31,14 @@ dir_output = '../output_20degree/'
 #     'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
 # ]
 files = [
-    'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
+    'zh_1to1_b0_z', 'zh_1to1_b0.5_z', 'zh_1to1_b1_z',
 ]
 
 def process_cont(cont, df, filename):
-    
     Z1 = (df['z1'][cont], df['z1.e'][cont])
     Z2 = (df['z2'][cont], df['z2.e'][cont])
-    M1 = (df['M1'][cont], df['M1.e'][cont])
-    M2 = (df['M2'][cont], df['M2.e'][cont])
+    M1 = (df['M1'][cont]*1.64, df['M1.e'][cont]*1.64)
+    M2 = (df['M2'][cont]*1.64, df['M2.e'][cont]*1.64)
     D_proj = (df['sep.Mpc'][cont], 0.05 * df['sep.Mpc'][cont], 0.05 * df['sep.Mpc'][cont])
 
     # if cont + 1 < len(df):  # インデックスが範囲内であることを確認
