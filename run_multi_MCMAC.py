@@ -1,12 +1,16 @@
 from multiprocessing import Pool
 
 # default prior: angle 0-90 degree
-from MCMAC_pre_merger import MCengine_pre_merger
-from MCMAC_post_merger import MCengine_post_merger 
+# from MCMAC_pre_merger import MCengine_pre_merger
+# from MCMAC_post_merger import MCengine_post_merger 
+
+# change prior: angle 0-45 degree
+from modules.MCMAC_pre_merger_changeprior_60degree import MCengine_pre_merger
+from modules.MCMAC_post_merger_changeprior_60degree import MCengine_post_merger 
 
 # change prior: angle 0-20 degree
-# from MCMAC_pre_merger_changeprior import MCengine_pre_merger
-# from MCMAC_post_merger_changeprior import MCengine_post_merger 
+# from modules.MCMAC_pre_merger_changeprior_20degree import MCengine_pre_merger
+# from modules.MCMAC_post_merger_changeprior_20degree import MCengine_post_merger 
 
 # weak lensing mass bias
 weak_lensing_bias_1to1 = False
@@ -35,19 +39,19 @@ N_mc = 1000
 
 # 作業ディレクトリ
 dir_cat = '../catalogues/'
-dir_output = '../output_weaklensing_bias/'
+dir_output = '../output_60degree/'
 
 # 入力カタログ
-# files = [
-#     'zh_1to1_b0_z', 'zh_1to1_b0.5_z', 'zh_1to1_b1_z',
-#     'zh_1to3_b0_z', 'zh_1to3_b0.5_z', 'zh_1to3_b1_z',
-#     'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
-# ]
-
-# weak lensing biasを考慮するときのみbiasが異なるのでratioごとに実行する必要がある！
 files = [
+    'zh_1to1_b0_z', 'zh_1to1_b0.5_z', 'zh_1to1_b1_z',
+    'zh_1to3_b0_z', 'zh_1to3_b0.5_z', 'zh_1to3_b1_z',
     'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
 ]
+
+# weak lensing biasを考慮するときのみbiasが異なるのでratioごとに実行する必要がある！
+# files = [
+#     'zh_1to10_b0_z', 'zh_1to10_b0.5_z', 'zh_1to10_b1_z'
+# ]
 
 def process_cont(cont, df, filename):
     Z1 = (df['z1'][cont], df['z1.e'][cont])

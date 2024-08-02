@@ -5,7 +5,7 @@ from multiprocessing import Pool
 # from MCMAC_post_merger import MCengine_post_merger 
 
 # change prior: angle 0-20 degree
-from MCMAC_post_merger_changeprior import MCengine_post_merger 
+from Study.MergingClusters_SSP2024.MCMAC.modules.MCMAC_post_merger_changeprior_20degree import MCengine_post_merger 
 
 # weak lensing mass bias
 weak_lensing_bias_1to1 = False
