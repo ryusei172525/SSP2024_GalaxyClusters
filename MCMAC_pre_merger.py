@@ -20,6 +20,8 @@ kminMpc = 3.08568025*10**19 # km in a Megaparsec
 minMpc = 3.08568025*10**22 # m in a Megaparsec            
 r2d = 180/numpy.pi # radians to degrees conversion factor
 
+
+
 def randdraw(A,index=None):
     '''
     This function randomly draws a variable from either and input gaussian
@@ -381,6 +383,7 @@ def MCengine_pre_merger(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=
         ALPHA = numpy.random.rand()*numpy.pi/2
         #Since not all alpha are equally likely.
         alpha = (1-numpy.cos(ALPHA))*numpy.pi/2
+        
         
         # Calculate the 3D velocity at observed time
         v_3d_obs = v_rad_obs/numpy.sin(alpha)
