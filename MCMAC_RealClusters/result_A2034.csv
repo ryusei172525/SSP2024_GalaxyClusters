@@ -1,2 +1,2 @@
-ClusterName,MCMAC_TSC0,MCMAC_TSC0.lower,MCMAC_TSC0.upper,MCMAC_TSC1,MCMAC_TSC1.lower,MCMAC_TSC1.upper,Simulation_TSC,Simulation_TSC.lower,Simulation_TSC.upper
-A2034,1.03,0.9,1.7,1.03,0.9,1.7,0.27,0,0
+ClusterName,MCMAC_TSC0,MCMAC_TSC0.lower,MCMAC_TSC0.upper,MCMAC_TSC1,MCMAC_TSC1.lower,MCMAC_TSC1.upper,Simulation_TSC
+A2034,1.01,0.78,1.91,1.24,0.98,2.56,0.26
