@@ -387,8 +387,12 @@ def MCengine_pre_merger(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=
         ALPHA = numpy.random.rand() * 20 * numpy.pi / 180  # Convert degrees to radians
 
         # Since not all alpha are equally likely.
-        alpha = (1 - numpy.cos(ALPHA)) * 20 * numpy.pi / 180  # Scale accordingly to the 20 degree range
-        
+        # alpha = (1 - numpy.cos(ALPHA)) * 20 * numpy.pi / 180  # Scale accordingly to the 20 degree range
+        """corrected alpha for not 90 degree!"""
+        max_angle_rad = numpy.radians(20)
+        U = numpy.random.rand()
+        alpha = numpy.arccos(1 - U * (1 - numpy.cos(max_angle_rad))) 
+
         # Calculate the 3D velocity at observed time
         v_3d_obs = v_rad_obs/numpy.sin(alpha)
         
